@@ -1,3 +1,18 @@
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int main(){
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    printf("SOcked created %d", sockfd);
+    // close(sockfd);
+    return 0;
+}
+
+
+
+
+
 // #include <stdio.h>
 
 // #define PI 3
