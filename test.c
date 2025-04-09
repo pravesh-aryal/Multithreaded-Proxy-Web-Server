@@ -3,9 +3,17 @@
 #include <sys/socket.h>
 
 int main(){
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    printf("SOcked created %d", sockfd);
-    // close(sockfd);
+    struct information{
+        char *name;
+        int id;
+    };
+
+    // struct information* john;
+    struct information info;
+    struct information* john = &info; //or use malloc
+    john->name = "john";
+    john->id = 1;
+    printf("the name is %s", john->name);
     return 0;
 }
 

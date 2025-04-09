@@ -54,10 +54,15 @@ int main(void){
         fprintf(stderr, "getaddrinfo: %s \n", gai_strerror(rv));
         return 1;
     }
+    printf("Hi %s \n", servinfo->ai_canonname);
 
     for (p = servinfo; p != NULL; p = p->ai_next){
-        
-    }
+        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd == -1)
+            perror("server: socket");
+            continue;
+    }    
+
 
     return 0;
     
