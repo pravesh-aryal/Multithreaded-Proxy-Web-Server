@@ -95,9 +95,17 @@ int main(void){
         exit(1);
     }
 
+    sa.sa_handler = sigchld_handler; //assigning a handler function that will run when SIGCHLD is receieved by parent   
+    sigemptyset(&sa.sa_mask); //no other signals are blocked while sigchld handler runs
+    sa.sa_flags = SA_RESTART; //makes interuptted calls like accept() automatically restart
+    //registering handler when any child process dies
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(1);
+    }
+
+    printf("server is waiting for connections \n");
     
-
-
 
     return 0;
     
