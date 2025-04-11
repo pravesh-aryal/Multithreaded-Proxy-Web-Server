@@ -57,11 +57,46 @@ int main(void){
     printf("Hi %s \n", servinfo->ai_canonname);
 
     for (p = servinfo; p != NULL; p = p->ai_next){
+
+        //create the first valid socket we can and bind to it
         sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (sockfd == -1)
             perror("server: socket");
             continue;
+        
+        //allowing the reuse of socket, using REUSEADDR and modifying atsocket level using SOL_SOCKET
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1){
+            //if fail
+            perror("setsockopt");
+            exit(1);
+        }
+
+        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1){
+            //if find fails
+            close(sockfd);
+            perror("server: bind");
+            continue;
+        }
+        //we break after the first socket
+        break;
+
     }    
+
+    freeaddrinfo(servinfo); // we are done with using servinfo
+
+    // p should not be null if we were successful
+    if (p == NULL){
+        fprintf(stderr, "server: failed to bind \n");
+        exit(1);
+    }
+
+    if (listen(sockfd, BACKLOG) == -1){
+        perror("Listen:");
+        exit(1);
+    }
+
+    
+
 
 
     return 0;

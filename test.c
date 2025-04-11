@@ -1,20 +1,15 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
 
 int main(){
-    struct information{
-        char *name;
-        int id;
-    };
-
-    // struct information* john;
-    struct information info;
-    struct information* john = &info; //or use malloc
-    john->name = "john";
-    john->id = 1;
-    printf("the name is %s", john->name);
-    return 0;
+    
+    exit(1);
+    printf("The integer is %d", 10);
 }
 
 
