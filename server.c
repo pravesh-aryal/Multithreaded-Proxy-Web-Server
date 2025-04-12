@@ -32,6 +32,17 @@
 // };
 
 
+void sigchld_handler(int s){
+
+    //errno is set when a system call fails could be anything open(), read(), bind() etc.
+    int saved_errno = errno;
+    //cleaning up zombie processes
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+
+    errno = saved_errno;
+
+}
+
 int main(void){
     int sockfd, new_fd; //we listen on sockfd, new connections made on new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -105,7 +116,31 @@ int main(void){
     }
 
     printf("server is waiting for connections \n");
-    
+
+    while (1){
+        sin_size = sizeof their_addr;
+        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+        if (new_fd == -1){
+            perror("Aceept: ");
+            continue;
+        }
+
+        inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof(s));
+        printf("Server got connection from %s", s);
+
+
+        if (!fork){ // the child process
+            close(sockfd);
+            if (send(new_fd, "Hello world!", 13, 0) == -1){
+                perror("send");
+            }
+            close(new_fd);
+            exit(0);
+        }
+        close(new_fd);
+
+    }
+
 
     return 0;
     

@@ -5,11 +5,44 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 int main(){
-    
-    exit(1);
-    printf("The integer is %d", 10);
+    pid_t  pid = fork();
+
+    if (pid < 0){
+        perror("Fork failed");
+        return 1;
+    }
+    printf("The pid is %d \n", pid);
+    printf("PID AGAIN : %d \n", pid);
+    if (pid == 0){
+        printf("Child: sleeping .... \n");
+        sleep(4);
+        printf("Child exits \n");
+        exit(0);
+    }
+
+    printf("Parent process started: \n");
+    while (1){
+
+        pid_t result = waitpid(-1, NULL, WNOHANG);
+        
+        if (result == 0){
+            printf("Parent: child still running: \n");
+        } else if (result == -1){
+            perror("waitpid");
+            break;
+        }else{
+            printf("Parent reaped child with PID %d \n", result);
+            break;
+        }
+        sleep(1);
+    }
+
+    printf("Parent: done \n");
+    return 0;
 }
 
 

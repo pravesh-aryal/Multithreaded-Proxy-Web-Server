@@ -4,6 +4,7 @@
         "netdb.h": "c",
         "unistd.h": "c",
         "stdlib.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "_pthread_types.h": "c"
     }
 }
