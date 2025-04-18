@@ -1,83 +1,46 @@
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
-int main(){
-    pid_t  pid = fork();
-
-    if (pid < 0){
-        perror("Fork failed");
+int main() {
+    int fd = open("test.txt", O_RDONLY);
+    if (fd == -1) {
+        perror("open");
         return 1;
     }
-    printf("The pid is %d \n", pid);
-    printf("PID AGAIN : %d \n", pid);
-    if (pid == 0){
-        printf("Child: sleeping .... \n");
-        sleep(4);
-        printf("Child exits \n");
-        exit(0);
+
+    // Get current file flags
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl - get");
+        close(fd);
+        return 1;
     }
 
-    printf("Parent process started: \n");
-    while (1){
+    // Set non-blocking mode
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        perror("fcntl - set");
+        close(fd);
+        return 1;
+    }
 
-        pid_t result = waitpid(-1, NULL, WNOHANG);
-        
-        if (result == 0){
-            printf("Parent: child still running: \n");
-        } else if (result == -1){
-            perror("waitpid");
-            break;
-        }else{
-            printf("Parent reaped child with PID %d \n", result);
-            break;
+    char buf[100];
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    if (n == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            printf("No data available (non-blocking read).\n");
+        } else {
+            perror("read");
         }
-        sleep(1);
+    } else if (n == 0) {
+        printf("End of file.\n");
+    } else {
+        buf[n] = '\0';
+        printf("Read %zd bytes: %s\n", n, buf);
     }
 
-    printf("Parent: done \n");
+    close(fd);
     return 0;
 }
-
-
-
-
-
-// #include <stdio.h>
-
-// #define PI 3
-// #define full_name "Pravesh Aryal"
-
-// const int a = 90;
-
-// int main(){
-//     printf("The PI value is %d\n", PI);
-//     printf("The full name is %s \n", full_name);
-//     printf("The a value is %d\n", a);
-
-//     printf("The address of a is %p\n", (void*)&a);
-//     printf("The address of a is %p\n", &a);
-
-//     printf("The address of PI is %p\n", &PI);
-
-// }
-
-// #include <stdio.h>
-
-// int main() {
-//     unsigned int x = 1;
-//     char *c = (char*)&x;
-//     if (*c)
-//         printf("Little-endian\n");
-//     else
-//         printf("Big-endian\n");
-//     return 0;
-// }
-
-
